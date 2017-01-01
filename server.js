@@ -61,10 +61,14 @@ function postHandler(req, res) {
 function updatePage(action, eleName) {
 	fs.readFile(`./public/index.html`, 'utf8', (err, content) => {
 		let contentArr = content.split('\n');
+		let olIndex = contentArr.indexOf('  <ol>');
+		let currNum = Number(contentArr[olIndex-1].split('These are ')[1].split('</h3>')[0]);
 		if(action === 'add') {
-			let olIndex = contentArr.indexOf('  <ol>');
-			contentArr.splice(olIndex+1, 0, '    <li>', `      <a href="./${eleName}.html">${eleName}</a>`, '    </li>');
+			contentArr[olIndex - 1] = `  <h3>These are ${currNum + 1}</h3>`;
+			contentArr.splice(olIndex + 1, 0, '    <li>', `      <a href="./${eleName}.html">${eleName}</a>`, '    </li>');
 			fs.writeFile('./public/index.html', contentArr.join('\n'), { defaultEncoding: 'utf8' });
+		}else if(action === 'remove') {
+			
 		}
 	});
 }
