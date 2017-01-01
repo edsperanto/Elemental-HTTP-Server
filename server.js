@@ -5,6 +5,18 @@ const PORT = process.env.PORT || 3000;
 
 const server = http.createServer((req, res) => {
 
+	console.log(req.url);
+	console.log(req.method);
+
+	req.setEncoding('utf8');
+
+	getHandler(req, res);
+	postHandler(req, res);
+
+});
+
+function getHandler(req, res) {
+	
 	let resourceMapping = {
 		'': './public/index.html',
 		'/': './public/index.html',
@@ -26,7 +38,21 @@ const server = http.createServer((req, res) => {
 		res.end();
 	});
 
-});
+}
+
+function postHandler(req, res) {
+
+	if(req.url === '/elements' && req.method === 'POST') {
+		checkValidPost();
+	}
+
+	function checkValidPost() {
+		req.on('data', (chunk) => {
+			console.log(chunk);
+		});
+	}
+
+}
 
 server.listen(PORT, () => {
 	console.log('Server is listening on port', PORT);
