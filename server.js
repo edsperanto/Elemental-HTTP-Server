@@ -52,13 +52,21 @@ function postHandler(req, res) {
 
 	function newElementPageGenFrom(dataObj) {
 		let newHTML = fs.writeFile(`./public/${dataObj.elementName}.html`, pageTemplate(dataObj), { defaultEncoding: 'utf8' });
-		updatePages(dataObj.elementName);
+		resourceMapping[`/${dataObj.elementName}.html`] = `./public/${dataObj.elementName}.html`;
+		updatePage('add', dataObj.elementName);
 	}
 
-	function updatePages(eleName) {
-		resourceMapping[`/${eleName}.html`] = `./public/${eleName}.html`;
-	}
+}
 
+function updatePage(action, eleName) {
+	fs.readFile(`./public/index.html`, 'utf8', (err, content) => {
+		let contentArr = content.split('\n');
+		if(action === 'add') {
+			let olIndex = contentArr.indexOf('  <ol>');
+			contentArr.splice(olIndex+1, 0, '    <li>', `      <a href="./${eleName}.html">${eleName}</a>`, '    </li>');
+			fs.writeFile('./public/index.html', contentArr.join('\n'), { defaultEncoding: 'utf8' });
+		}
+	});
 }
 
 server.listen(PORT, () => {

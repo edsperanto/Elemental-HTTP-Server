@@ -9,7 +9,7 @@ function pageTemplate(dataObj) {
 <body>
   <h1>${dataObj.elementName}</h1>
   <h2>${dataObj.elementSymbol}</h2>
-  <h3>${dataObj.elementAtomicNumber}</h3>
+  <h3>Atomic number ${dataObj.elementAtomicNumber}</h3>
   <p>${dataObj.elementDescription.split('+').join(' ')}</p>
   <p><a href="/">back</a></p>
 </body>
