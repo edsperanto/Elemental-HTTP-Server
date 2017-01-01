@@ -43,12 +43,41 @@ function getHandler(req, res) {
 function postHandler(req, res) {
 
 	if(req.url === '/elements' && req.method === 'POST') {
-		checkValidPost();
+		req.on('data', (chunk) => {
+			urlDecoder(chunk);
+		});
 	}
 
-	function checkValidPost() {
-		req.on('data', (chunk) => {
-			console.log(chunk);
+	function urlDecoder(chunk) {
+		let keyValueArr = chunk.split('&');
+		let newElementDataObj = {
+			elementName: keyValueArr[0].split('=')[1],
+			elementSymbol: keyValueArr[1].split('=')[1],
+			elementAtomicNumber: keyValueArr[2].split('=')[1],
+			elementDescription: keyValueArr[3].split('=')[1],
+		}
+		newElementPageGenFrom(newElementDataObj);
+	}
+
+	function newElementPageGenFrom(dataObj) {
+		let stream = fs.createWriteStream(`${dataObj.elementName}.html`);
+		stream.once('open', function(file) {
+			stream.write(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>The Elements - ${dataObj.elementName}</title>
+  <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body>
+  <h1>${dataObj.elementName}</h1>
+  <h2>${dataObj.elementSymbol}</h2>
+  <h3>${dataObj.elementAtomicNumber}</h3>
+  <p>${dataObj.elementelementDescriptionName}</p>
+  <p><a href="/">back</a></p>
+</body>
+</html>`);
+			stream.end();
 		});
 	}
 
