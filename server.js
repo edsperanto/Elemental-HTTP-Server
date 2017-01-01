@@ -1,8 +1,5 @@
 let fs = require('fs');
 let http = require('http');
-
-const PORT = process.env.PORT || 3000;
-
 let resourceMapping = {
 	'': './public/index.html',
 	'/': './public/index.html',
@@ -13,20 +10,15 @@ let resourceMapping = {
 	'/404.html': './public/404.html'
 }
 
+const PORT = process.env.PORT || 3000;
+const pageTemplate = require('./pageTemplate.js');
 const server = http.createServer((req, res) => {
-
-	console.log(req.url);
-	console.log(req.method);
-
 	req.setEncoding('utf8');
-
 	getHandler(req, res);
 	postHandler(req, res);
-
 });
 
 function getHandler(req, res) {
-	
 	fs.readFile(resourceMapping[req.url] || resourceMapping['/404.html'], (err, content) => {
 		if(req.url.indexOf('css') > -1) {
 			res.setHeader('Content-Type', 'text/css');
@@ -37,7 +29,6 @@ function getHandler(req, res) {
 		res.write(content);
 		res.end();
 	});
-
 }
 
 function postHandler(req, res) {
@@ -60,32 +51,15 @@ function postHandler(req, res) {
 	}
 
 	function newElementPageGenFrom(dataObj) {
-		let newHTML = fs.writeFile(`./public/${dataObj.elementName}.html`, `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>The Elements - ${dataObj.elementName}</title>
-  <link rel="stylesheet" href="./css/styles.css">
-</head>
-<body>
-  <h1>${dataObj.elementName}</h1>
-  <h2>${dataObj.elementSymbol}</h2>
-  <h3>${dataObj.elementAtomicNumber}</h3>
-  <p>${dataObj.elementDescription.split('+').join(' ')}</p>
-  <p><a href="/">back</a></p>
-</body>
-</html>`, { defaultEncoding: 'utf8' });
+		let newHTML = fs.writeFile(`./public/${dataObj.elementName}.html`, pageTemplate(dataObj), { defaultEncoding: 'utf8' });
 		updatePages(dataObj.elementName);
 	}
 
 	function updatePages(eleName) {
 		resourceMapping[`/${eleName}.html`] = `./public/${eleName}.html`;
-		console.log(resourceMapping);
 	}
 
 }
-
-
 
 server.listen(PORT, () => {
 	console.log('Server is listening on port', PORT);
