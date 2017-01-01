@@ -60,9 +60,7 @@ function postHandler(req, res) {
 	}
 
 	function newElementPageGenFrom(dataObj) {
-		let stream = fs.createWriteStream(`${dataObj.elementName}.html`);
-		stream.once('open', function(file) {
-			stream.write(`<!DOCTYPE html>
+		let newHTML = fs.writeFile(`./public/${dataObj.elementName}.html`, `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -73,12 +71,10 @@ function postHandler(req, res) {
   <h1>${dataObj.elementName}</h1>
   <h2>${dataObj.elementSymbol}</h2>
   <h3>${dataObj.elementAtomicNumber}</h3>
-  <p>${dataObj.elementelementDescriptionName}</p>
+  <p>${dataObj.elementDescription.split('+').join(' ')}</p>
   <p><a href="/">back</a></p>
 </body>
-</html>`);
-			stream.end();
-		});
+</html>`, { defaultEncoding: 'utf8' });
 	}
 
 }
