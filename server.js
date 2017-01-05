@@ -67,7 +67,7 @@ function postHandler(req, res) {
 	if(req.url === '/elements') {
 		req.on('data', (chunk) => { 
 			let dataObj = qs.parse(chunk);
-			let newHTML = fs.writeFile(`./public/${dataObj.elementName.toLowerCase()}.html`, pageTemplate(dataObj), 'utf8');
+			fs.writeFile(`./public/${dataObj.elementName.toLowerCase()}.html`, pageTemplate(dataObj), 'utf8');
 			updatePage('add', [dataObj.elementName]);
 			res.statusCode = 200;
 			res.setHeader('Content-Type', 'application/json');
@@ -78,11 +78,11 @@ function postHandler(req, res) {
 }
 
 function putHandler(req, res) {
-
+	// add code for PUT requests
 }
 
 function delHandler(req, res) {
-
+	// add code for DELETE requests
 }
 
 function updatePage(action, eleNamesArr) {
