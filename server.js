@@ -15,8 +15,10 @@ fs.writeFile('./public/index.html', indexReset, 'utf8', () => {
 			}
 			for(let i = 0; i < files.length; i++) {
 				let eleName = files[i].split('.html')[0];
-				updatePage('add', eleName[0].toUpperCase() + eleName.substr(1));
+				eleName = eleName[0].toUpperCase() + eleName.substr(1);
+				files[i] = eleName;
 			}
+			updatePage('add', files);
 		});
 	}
 });
@@ -25,6 +27,8 @@ let server = http.createServer((req, res) => {
 	req.setEncoding('utf8');
 	getHandler(req, res);
 	postHandler(req, res);
+	putHandler(req, res);
+	delHandler(req, res);
 });
 
 function getHandler(req, res) {
@@ -60,17 +64,27 @@ function postHandler(req, res) {
 	}
 }
 
-function updatePage(action, eleName) {
+function putHandler(req, res) {
+
+}
+
+function delHandler(req, res) {
+
+}
+
+function updatePage(action, eleNames) {
 	fs.readFile(`./public/index.html`, 'utf8', (err, content) => {
 		let contentArr = content.split('\n');
 		let olIndex = contentArr.indexOf('  <ol>');
 		let currNum = Number(contentArr[olIndex-1].split('These are ')[1].split('</h3>')[0]);
 		if(action === 'add') {
-			contentArr[olIndex - 1] = `  <h3>These are ${currNum + 1}</h3>`;
-			contentArr.splice(olIndex + 1, 0, '    <li>', `      <a href="./${eleName.toLowerCase()}.html">${eleName}</a>`, '    </li>');
+			for(let i = 0; i < eleNames.length; i++) {
+				contentArr[olIndex - 1] = `  <h3>These are ${++currNum}</h3>`;
+				contentArr.splice(olIndex + 1, 0, '    <li>', `      <a href="./${eleNames[i].toLowerCase()}.html">${eleNames[i]}</a>`, '    </li>');
+			}
 			fs.writeFile('./public/index.html', contentArr.join('\n'), 'utf8');
 		}else if(action === 'remove') {
-			contentArr[olIndex - 1] = `  <h3>These are ${currNum - 1}</h3>`;
+			contentArr[olIndex - 1] = `  <h3>These are ${--currNum}</h3>`;
 			// add code to remove <li> element
 			fs.writeFile('./public/index.html', contentArr.join('\n'), 'utf8');
 		}
