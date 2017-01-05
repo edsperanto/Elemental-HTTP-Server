@@ -102,7 +102,23 @@ function putHandler(req, res) {
 }
 
 function delHandler(req, res) {
-	// add code for DELETE requests
+	fs.readdir('./public', (err, files) => {
+		let filesToIgnore = ['.keep', '404.html', 'css', 'index.html'];
+		for(let i = 0; i < filesToIgnore.length; i++) {
+			files.splice(files.indexOf(filesToIgnore[i]), 1);
+		}
+		if(files.indexOf(req.url.substr(1)) > -1) {
+			res.statusCode = 200;
+			res.setHeader('Content-Type', 'text/plain');
+			res.write('I shall delete it... soon...');
+			res.end();
+		}else{
+			res.statusCode = 500;
+			res.setHeader('Content-Type', 'application/json');
+			res.write(`{ "error" : "resource ${req.url} does not exist" }`);
+			res.end();
+		}
+	});
 }
 
 function updatePage(action, eleNamesArr) {
