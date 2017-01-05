@@ -14,9 +14,17 @@ function getHandler(req, res) {
 	if(req.method === 'GET') {
 		fs.readFile(`./public${(req.url === '/') ? ('/index.html') : (req.url)}`, (err, content) => {
 			res.setHeader('Content-Type', (req.url.indexOf('css') > -1) ? ('text/css') : ('text/html'));
-			if(err) { res.statusCode = 404; }
-			res.write(content);
-			res.end();
+			if(err) { 
+				res.statusCode = 404; 
+				fs.readFile('./public/404.html', (_, errPage) => {
+					res.write(errPage);
+					res.end();
+				});
+			}else{
+				res.statusCode = 200;
+				res.write(content);
+				res.end();
+			}
 		});
 	}
 }
