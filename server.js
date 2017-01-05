@@ -78,17 +78,20 @@ function postHandler(req, res) {
 }
 
 function putHandler(req, res) {
-	// add code for PUT requests
 	fs.readdir('./public', (err, files) => {
 		let filesToIgnore = ['.keep', '404.html', 'css', 'index.html'];
 		for(let i = 0; i < filesToIgnore.length; i++) {
 			files.splice(files.indexOf(filesToIgnore[i]), 1);
 		}
 		if(files.indexOf(req.url.substr(1)) > -1) {
-			res.statusCode = 302;
-			res.setHeader('Content-Type', 'application/json');
-			res.write(`{ "found" : "resource ${req.url} exists" }`);
-			res.end();
+			req.on('data', (chunk) => { 
+				let dataObj = qs.parse(chunk);
+				fs.writeFile(`./public/${dataObj.elementName.toLowerCase()}.html`, pageTemplate(dataObj), 'utf8');
+				res.statusCode = 200;
+				res.setHeader('Content-Type', 'application/json');
+				res.write('{ "success": true }');
+				res.end();
+			});
 		}else{
 			res.statusCode = 500;
 			res.setHeader('Content-Type', 'application/json');
