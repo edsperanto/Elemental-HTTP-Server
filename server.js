@@ -2,21 +2,7 @@ const fs = require('fs');
 const http = require('http');
 const qs = require('querystring');
 const PORT = process.env.PORT || 3000;
-const indexReset = require('./indexReset.js');
 const pageTemplate = require('./pageTemplate.js');
-
-// reset index.html every run
-fs.writeFile('./public/index.html', indexReset, { defaultEncoding: 'utf8' });
-
-let resourceMapping = {
-	'': './public/index.html',
-	'/': './public/index.html',
-	'/index.html': './public/index.html',
-	'/hydrogen.html': './public/hydrogen.html',
-	'/helium.html': './public/helium.html',
-	'/css/styles.css': './public/css/styles.css',
-	'/404.html': './public/404.html'
-}
 
 let server = http.createServer((req, res) => {
 	req.setEncoding('utf8');
@@ -26,7 +12,7 @@ let server = http.createServer((req, res) => {
 
 function getHandler(req, res) {
 	if(req.method === 'GET') {
-		fs.readFile(resourceMapping[req.url] || resourceMapping['/404.html'], (err, content) => {
+		fs.readFile(`./public${(req.url === '/') ? ('/index.html') : (req.url)}`, (err, content) => {
 			res.setHeader('Content-Type', (req.url.indexOf('css') > -1) ? ('text/css') : ('text/html'));
 			if(err) { res.statusCode = 404; }
 			res.write(content);
@@ -39,8 +25,7 @@ function postHandler(req, res) {
 	if(req.url === '/elements' && req.method === 'POST') {
 		req.on('data', (chunk) => { 
 			let dataObj = qs.parse(chunk);
-			let newHTML = fs.writeFile(`./public/${dataObj.elementName}.html`, pageTemplate(dataObj), { defaultEncoding: 'utf8' });
-			resourceMapping[`/${dataObj.elementName}.html`] = `./public/${dataObj.elementName}.html`;
+			let newHTML = fs.writeFile(`./public/${dataObj.elementName.toLowerCase()}.html`, pageTemplate(dataObj), { defaultEncoding: 'utf8' });
 			updatePage('add', dataObj.elementName);
 			res.statusCode = 200;
 			res.setHeader('Content-Type', 'application/json');
