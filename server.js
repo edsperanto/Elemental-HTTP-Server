@@ -25,37 +25,50 @@ fs.writeFile('./public/index.html', indexReset, 'utf8', () => {
 
 let server = http.createServer((req, res) => {
 	req.setEncoding('utf8');
-	getHandler(req, res);
-	postHandler(req, res);
-	putHandler(req, res);
-	delHandler(req, res);
+	switch(req.method) {
+		case 'GET':
+			getHandler(req, res);
+			break;
+		case 'POST':
+			postHandler(req, res);
+			break;
+		case 'PUT':
+			putHandler(req, res);
+			break;
+		case 'DELETE':
+			delHandler(req, res);
+			break;
+		default:
+			res.setHeader('Content-Type', 'text/plain');
+			res.write('Invalid HTTP request');
+			res.end();
+			break;
+	}
 });
 
 function getHandler(req, res) {
-	if(req.method === 'GET') {
-		fs.readFile(`./public${(req.url === '/') ? ('/index.html') : (req.url)}`, (err, content) => {
-			res.setHeader('Content-Type', (req.url.indexOf('css') > -1) ? ('text/css') : ('text/html'));
-			if(err) { 
-				res.statusCode = 404; 
-				fs.readFile('./public/404.html', (_, errPage) => {
-					res.write(errPage);
-					res.end();
-				});
-			}else{
-				res.statusCode = 200;
-				res.write(content);
+	fs.readFile(`./public${(req.url === '/') ? ('/index.html') : (req.url)}`, (err, content) => {
+		res.setHeader('Content-Type', (req.url.indexOf('css') > -1) ? ('text/css') : ('text/html'));
+		if(err) { 
+			res.statusCode = 404; 
+			fs.readFile('./public/404.html', (_, errPage) => {
+				res.write(errPage);
 				res.end();
-			}
-		});
-	}
+			});
+		}else{
+			res.statusCode = 200;
+			res.write(content);
+			res.end();
+		}
+	});
 }
 
 function postHandler(req, res) {
-	if(req.url === '/elements' && req.method === 'POST') {
+	if(req.url === '/elements') {
 		req.on('data', (chunk) => { 
 			let dataObj = qs.parse(chunk);
 			let newHTML = fs.writeFile(`./public/${dataObj.elementName.toLowerCase()}.html`, pageTemplate(dataObj), 'utf8');
-			updatePage('add', dataObj.elementName);
+			updatePage('add', [dataObj.elementName]);
 			res.statusCode = 200;
 			res.setHeader('Content-Type', 'application/json');
 			res.write('{ "success": true }');
@@ -72,15 +85,15 @@ function delHandler(req, res) {
 
 }
 
-function updatePage(action, eleNames) {
+function updatePage(action, eleNamesArr) {
 	fs.readFile(`./public/index.html`, 'utf8', (err, content) => {
 		let contentArr = content.split('\n');
 		let olIndex = contentArr.indexOf('  <ol>');
 		let currNum = Number(contentArr[olIndex-1].split('These are ')[1].split('</h3>')[0]);
 		if(action === 'add') {
-			for(let i = 0; i < eleNames.length; i++) {
+			for(let i = 0; i < eleNamesArr.length; i++) {
 				contentArr[olIndex - 1] = `  <h3>These are ${++currNum}</h3>`;
-				contentArr.splice(olIndex + 1, 0, '    <li>', `      <a href="./${eleNames[i].toLowerCase()}.html">${eleNames[i]}</a>`, '    </li>');
+				contentArr.splice(olIndex + 1, 0, '    <li>', `      <a href="./${eleNamesArr[i].toLowerCase()}.html">${eleNamesArr[i]}</a>`, '    </li>');
 			}
 			fs.writeFile('./public/index.html', contentArr.join('\n'), 'utf8');
 		}else if(action === 'remove') {
