@@ -7,16 +7,18 @@ const pageTemplate = require('./pageTemplate.js');
 
 // reset and update index.html every run
 fs.writeFile('./public/index.html', indexReset, 'utf8', () => {
-	fs.readdir('./public', (err, files) => {
-		let filesToIgnore = ['.keep', '404.html', 'css', 'helium.html', 'hydrogen.html', 'index.html'];
-		for(let i = 0; i < filesToIgnore.length; i++) {
-			files.splice(files.indexOf(filesToIgnore[i]), 1);
-		}
-		for(let i = 0; i < files.length; i++) {
-			let eleName = files[i].split('.html')[0];
-			updatePage('add', eleName[0].toUpperCase() + eleName.substr(1));
-		}
-	})
+	if(process.env.REPOP === undefined) { // allow for resetting index
+		fs.readdir('./public', (err, files) => {
+			let filesToIgnore = ['.keep', '404.html', 'css', 'helium.html', 'hydrogen.html', 'index.html'];
+			for(let i = 0; i < filesToIgnore.length; i++) {
+				files.splice(files.indexOf(filesToIgnore[i]), 1);
+			}
+			for(let i = 0; i < files.length; i++) {
+				let eleName = files[i].split('.html')[0];
+				updatePage('add', eleName[0].toUpperCase() + eleName.substr(1));
+			}
+		});
+	}
 });
 
 let server = http.createServer((req, res) => {
